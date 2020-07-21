@@ -57,8 +57,15 @@ func (s *S) TestIframes() {
 func (s *S) TestContains() {
 	p := s.page.Navigate(srcFile("fixtures/click.html"))
 	a := p.Element("button")
-	b := p.Element("button")
+
+	_, _ = proto.DOMGetDocument{}.Call(p)
+	res, _ := proto.DOMRequestNode{ObjectID: a.ObjectID}.Call(p)
+	b := p.ElementFromNode(res.NodeID)
 	s.True(a.ContainsElement(b))
+
+	box := a.Box()
+	c := p.ElementFromPoint(int(box.X)+3, int(box.Y)+3)
+	s.True(a.ContainsElement(c))
 }
 
 func (s *S) TestShadowDOM() {
@@ -321,6 +328,7 @@ func (s *S) TestElementEWithDepth() {
 func (s *S) TestElementOthers() {
 	p := s.page.Navigate(srcFile("fixtures/input.html"))
 	el := p.Element("form")
+	s.IsType(p.GetContext(), el.GetContext())
 	el.Focus()
 	el.ScrollIntoView()
 	s.EqualValues(784, el.Box().Width)

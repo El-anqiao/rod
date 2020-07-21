@@ -16,10 +16,6 @@ import (
 	"github.com/ysmood/kit"
 )
 
-func (s *S) TestBrowserContext() {
-	s.browser.Timeout(time.Minute).CancelTimeout()
-}
-
 func (s *S) TestIncognito() {
 	file := srcFile("fixtures/click.html")
 	k := kit.RandString(8)
@@ -45,6 +41,13 @@ func (s *S) TestBrowserPages() {
 	}
 
 	s.Len(pages, 3)
+}
+
+func (s *S) TestBrowserClearStates() {
+	kit.E(proto.EmulationClearGeolocationOverride{}.Call(s.page))
+
+	defer s.browser.EnableDomain(s.browser.GetContext(), "", &proto.TargetSetDiscoverTargets{Discover: true})()
+	s.browser.DisableDomain(s.browser.GetContext(), "", &proto.TargetSetDiscoverTargets{Discover: false})()
 }
 
 func (s *S) TestBrowserWaitEvent() {
@@ -229,6 +232,10 @@ func (s *S) TestTry() {
 	ok := errors.As(err, &errVal)
 	s.True(ok)
 	s.Equal(1, errVal.Details)
+}
+
+func (s *S) TestBrowserOthers() {
+	s.browser.Timeout(time.Minute).CancelTimeout()
 }
 
 // It's obvious that, the v8 will take more time to parse long function.
